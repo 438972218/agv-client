@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xdcplus.xdcweb.basics.mapper.AgvStateMapper">
+    <insert id="insertReturnId" parameterType="com.xdcplus.netty.common.model.AgvState"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into agv_state(agv_id,task_num,agv_energy,state,cur_station_num,map_id,x,y)
+        values(#{agvId},#{taskNum},#{agvEnergy},#{state},#{curStationNum},#{mapId},#{x},#{y})
+    </insert>
+
+    <resultMap id="ListResultMap" type="com.xdcplus.netty.common.model.AgvState">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="task_num" jdbcType="INTEGER" property="taskNum" />
+        <result column="agv_id" jdbcType="INTEGER" property="agvId" />
+        <result column="agv_energy" jdbcType="INTEGER" property="agvEnergy" />
+        <result column="state" jdbcType="INTEGER" property="state" />
+        <result column="cur_station_num" jdbcType="INTEGER" property="curStationNum" />
+        <result column="map_id" jdbcType="INTEGER" property="mapId" />
+        <result column="x" jdbcType="INTEGER" property="x" />
+        <result column="y" jdbcType="INTEGER" property="y" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <collection ofType="com.xdcplus.netty.common.model.AxisState" property="axisStates">
+            <id column="as_id" jdbcType="BIGINT" property="id" />
+            <result column="agv_state_id" jdbcType="BIGINT" property="agvStateId" />
+            <result column="action_axis" jdbcType="INTEGER" property="actionAxis" />
+            <result column="material_count" jdbcType="INTEGER" property="materialCount" />
+            <result column="material_type" jdbcType="INTEGER" property="materialType" />
+        </collection>
+    </resultMap>
+    <select id="listAll" parameterType="com.xdcplus.netty.common.model.AgvState" resultMap="ListResultMap">
+        select r.*,si.*,sti.*,si.id as si_id,sti.id as sti_id
+        from request r
+        LEFT JOIN station_info si on r.id =si.request_id
+        LEFT JOIN station_task_info sti on si.id =sti.station_info_id
+        <where>
+            <if test="taskNum!=null">
+                task_num = #{taskNum,jdbcType=INTEGER}
+            </if>
+            <if test="agvId!=null">
+                agv_id = #{agvId,jdbcType=INTEGER}
+            </if>
+        </where>
+    </select>
+</mapper>

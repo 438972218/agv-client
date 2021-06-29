@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xdcplus.xdcweb.basics.mapper.StationInfoMapper">
+
+    <insert id="insertReturnId" parameterType="com.xdcplus.netty.common.model.StationInfo"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into station_info(request_id,station_id,station_index)
+        values(#{requestId},#{stationId},#{stationIndex})
+    </insert>
+</mapper>

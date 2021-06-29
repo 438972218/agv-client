@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xdcplus.xdcweb.basics.mapper.RequestMapper">
+    <insert id="insertReturnId" parameterType="com.xdcplus.netty.common.model.Request"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into request(task_num,agv_id,status)
+        values(#{taskNum},#{agvId},#{status})
+    </insert>
+
+    <resultMap id="ListResultMap" type="com.xdcplus.netty.common.model.Request">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="task_num" jdbcType="INTEGER" property="taskNum" />
+        <result column="agv_id" jdbcType="INTEGER" property="agvId" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <collection ofType="com.xdcplus.netty.common.model.StationInfo" property="stationInfos">
+            <id column="si_id" jdbcType="BIGINT" property="id" />
+            <result column="request_id" jdbcType="BIGINT" property="requestId" />
+            <result column="station_id" jdbcType="INTEGER" property="stationId" />
+            <result column="station_index" jdbcType="INTEGER" property="stationIndex" />
+            <collection ofType="com.xdcplus.netty.common.model.StationTaskInfo" property="stationTaskInfos">
+                <id column="sti_id" jdbcType="BIGINT" property="id" />
+                <result column="station_info_id" jdbcType="BIGINT" property="stationInfoId" />
+                <result column="action_index" jdbcType="INTEGER" property="actionIndex" />
+                <result column="action_axis" jdbcType="INTEGER" property="actionAxis" />
+                <result column="task_type" jdbcType="INTEGER" property="taskType" />
+                <result column="if_type" jdbcType="INTEGER" property="ifType" />
+            </collection>
+        </collection>
+    </resultMap>
+    <select id="listAll" parameterType="com.xdcplus.netty.common.model.Request" resultMap="ListResultMap">
+        select r.*,si.*,sti.*,si.id as si_id,sti.id as sti_id
+        from request r
+        LEFT JOIN station_info si on r.id =si.request_id
+        LEFT JOIN station_task_info sti on si.id =sti.station_info_id
+        <where>
+            <if test="id!=null">
+                r.id = #{id,jdbcType=BIGINT}
+            </if>
+            <if test="taskNum!=null">
+                r.task_num = #{taskNum,jdbcType=INTEGER}
+            </if>
+            <if test="agvId!=null">
+                r.agv_id = #{agvId,jdbcType=INTEGER}
+            </if>
+            <if test="status!=null">
+                r.status = #{status,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by r.create_time desc
+    </select>
+    <select id="listAllByTaskNum" parameterType="java.lang.Integer" resultMap="ListResultMap">
+        select r.*,si.*,sti.*,si.id as si_id,sti.id as sti_id
+        from request r
+        LEFT JOIN station_info si on r.id =si.request_id
+        LEFT JOIN station_task_info sti on si.id =sti.station_info_id
+        where r.task_num = #{id,jdbcType=INTEGER}
+    </select>
+</mapper>

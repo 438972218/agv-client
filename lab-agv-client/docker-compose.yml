@@ -1,0 +1,31 @@
+version: "1"
+
+services:
+  lab-agv-client:
+    image: 10.20.54.132:8000/lab/lab-agv-client:latest
+    container_name: lab-agv-client
+    restart: always
+    ports:
+      - 9001:8080
+      - 9095:9095
+    expose:
+      - 8080
+    environment:
+      MYSQL_HOST: 10.20.1.130
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: agv
+      MYSQL_USER: root
+      MYSQL_PASSWORD: xdcplus.com
+      REDIS_HOST: 10.20.54.134
+      REDIS_PORT: 6379
+      REDIS_DATABASE: 0
+      SWAGGER_ENABLE: "true"
+    volumes:
+      - /data/lab-agv-client/logs:/logs
+    networks:
+      - mes_net
+
+
+networks:
+  mes_net:
+    external: true
