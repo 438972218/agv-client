@@ -1,30 +1,28 @@
 package com.xdcplus.xdcweb.basics.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.xdcplus.netty.common.dto.RequestDTO;
 import com.xdcplus.netty.common.dto.TaskDTO;
 import com.xdcplus.netty.common.model.*;
-import com.xdcplus.xdcweb.basics.mapper.AgvMessageMapper;
-import com.xdcplus.xdcweb.basics.mapper.AgvStateMapper;
-import com.xdcplus.xdcweb.basics.mapper.AlarmStateMapper;
-import com.xdcplus.xdcweb.basics.mapper.RequestMapper;
 import com.xdcplus.xdcweb.basics.service.*;
+import com.xdcplus.xdcweb.global.utils.PropertyUtils;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,7 +103,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<AgvMessage> {
 //            } else if (event.state().equals(IdleState.WRITER_IDLE)) {
 //                System.out.println("Client WRITER_IDLE");
 //            } else
-            if (event.state().equals(IdleState.ALL_IDLE)) {
+            if (event.state().equals(IdleState.WRITER_IDLE)) {
 //                System.out.println("Client ALL_IDLE");
                 if (TcpClient.restrict) {
                     AgvMessage agvMessage = combineAgvMessage();
@@ -123,11 +121,12 @@ public class ClientHandler extends SimpleChannelInboundHandler<AgvMessage> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, AgvMessage agvMessage) throws Exception {
+//        log.info("Server say : " + agvMessage);
 //        System.out.println("Server say : " + agvMessage);
         agvMessage.setType("server");
         //ACK确认包
         if (agvMessage.getPackType().equals(PACK_TYPE_ACK)) {
-            clientHandler.agvMessageService.save(agvMessage);
+//            clientHandler.agvMessageService.save(agvMessage);
             //状态报文
         } else if (agvMessage.getPackType().equals(PACK_TYPE_STATE)) {
             packTypeState(agvMessage);
@@ -191,25 +190,52 @@ public class ClientHandler extends SimpleChannelInboundHandler<AgvMessage> {
 
     //状态报文
     private void packTypeState(AgvMessage agvMessage) {
+//        log.info("Server say : " + agvMessage);
         clientHandler.agvMessageService.save(agvMessage);
-        String data = agvMessage.getData();
-        AgvPad agvPad = JSON.parseObject(data, AgvPad.class);
-        Optional.ofNullable(agvPad).ifPresent(agvPad1 -> {
-            List<AgvState> agvStates = agvPad1.getAgvStates();
-            for (AgvState agvState : agvStates) {
-                Integer id = clientHandler.agvStateService.insertReturnId(agvState);
-                if (agvState.getAxisStates() != null) {
-                    for (AxisState axisState : agvState.getAxisStates()) {
-                        axisState.setAgvStateId(id);
-                        clientHandler.axisStateService.save(axisState);
-                    }
-                }
-            }
-            List<AlarmState> alarmStates = agvPad1.getAlarmStates();
-            for (AlarmState alarmState : alarmStates) {
-                clientHandler.alarmStateService.save(alarmState);
-            }
-        });
+
+        AgvState agvState=new AgvState();
+        BeanUtils.copyProperties(agvMessage, agvState);
+//        QueryWrapper<AgvState> agvStateQueryWrapper=new QueryWrapper<>();
+//        agvStateQueryWrapper.eq("agv_id",agvState.getAgvId());
+//        int count = agvStateService.count(agvStateQueryWrapper);
+//        if(count!=0){
+            UpdateWrapper<AgvState> updateWrapper=new UpdateWrapper<>();
+            updateWrapper.eq("agv_id",agvState.getAgvId());
+//            agvStateService.update(agvState,updateWrapper);
+//        }else{
+        agvState.setId(null);
+        agvState.setUpdateTime(DateUtil.toLocalDateTime(new Date()));
+        clientHandler.agvStateService.saveOrUpdate(agvState,updateWrapper);
+//        }
+//        List<AxisState> axisStates=agvMessage.getAxisStates();
+//        if(CollUtil.isEmpty(axisStates)){
+//            return;
+//        }
+//        axisStates.forEach(axisState -> {
+//            axisState.setAgvStateId(agvState.getId());
+//            UpdateWrapper<AxisState> axisStateUpdateWrapper=new UpdateWrapper<>();
+//            axisStateUpdateWrapper.eq("agv_state_id",agvMessage.getAgvId());
+//            clientHandler.axisStateService.saveOrUpdate(axisState, axisStateUpdateWrapper);
+//        });
+
+//        String data = agvMessage.getData();
+//        AgvPad agvPad = JSON.parseObject(data, AgvPad.class);
+//        Optional.ofNullable(agvPad).ifPresent(agvPad1 -> {
+//            List<AgvState> agvStates = agvPad1.getAgvStates();
+//            for (AgvState agvState : agvStates) {
+//                Integer id = clientHandler.agvStateService.insertReturnId(agvState);
+//                if (agvState.getAxisStates() != null) {
+//                    for (AxisState axisState : agvState.getAxisStates()) {
+//                        axisState.setAgvStateId(id);
+//                        clientHandler.axisStateService.save(axisState);
+//                    }
+//                }
+//            }
+//            List<AlarmState> alarmStates = agvPad1.getAlarmStates();
+//            for (AlarmState alarmState : alarmStates) {
+//                clientHandler.alarmStateService.save(alarmState);
+//            }
+//        });
     }
 
     public AgvMessage combineAgvMessage() {

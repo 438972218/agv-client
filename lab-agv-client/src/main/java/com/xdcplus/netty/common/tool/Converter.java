@@ -1,9 +1,13 @@
 package com.xdcplus.netty.common.tool;
 
+import cn.hutool.core.collection.CollUtil;
 import com.xdcplus.netty.common.model.AgvMessage;
+import com.xdcplus.netty.common.model.AxisState;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -378,18 +382,89 @@ public class Converter {
         byte[] heart= Arrays.copyOfRange(bytes,30,32);
         int heart1 = int2Toint(heart);
         byte[] packType= Arrays.copyOfRange(bytes,32,34);
+        //报文类型
         int packType1 = int2Toint(packType);
+        //状态报文
+        if(packType1==260){
+            //小车编号
+            byte[] agvId= Arrays.copyOfRange(bytes,44,46);
+            int agvId1 = int2Toint(agvId);
+            //任务编号
+            byte[] taskNum= Arrays.copyOfRange(bytes,46,50);
+            int taskNum1 = bytesToInt2(taskNum,0);
+            //小车电量
+            byte[] agvEnergy= Arrays.copyOfRange(bytes,50,52);
+            int agvEnergy1 = int2Toint(agvEnergy);
+            //小车状态
+            byte[] agvState= Arrays.copyOfRange(bytes,52,54);
+            int agvState1 = int2Toint(agvState);
+            //当前站台
+            byte[] curStationNum= Arrays.copyOfRange(bytes,54,56);
+            int curStationNum1 = int2Toint(curStationNum);
+            //小车角度
+            byte[] agvAngle= Arrays.copyOfRange(bytes,56,58);
+            int agvAngle1 = int2Toint(agvAngle);
+            //轴数量
+            byte[] axleQty= Arrays.copyOfRange(bytes,58,60);
+            int axleQty1 = int2Toint(axleQty);
+            //轴状态
+            List<AxisState> axisStates =new ArrayList<>();
+            int location = 0;
+            for(int i=0;i<axleQty1;i++){
+                AxisState axisState=new AxisState();
+                //轴号
+                byte[] actionAxis= Arrays.copyOfRange(bytes,58+(i*8),60+(i*8));
+                int actionAxis1 = int2Toint(actionAxis);
+                //花篮数量
+                byte[] materialCount= Arrays.copyOfRange(bytes,60+(i*8),62+(i*8));
+                int materialCount1 = int2Toint(materialCount);
+                //物料类型
+                byte[] materialType= Arrays.copyOfRange(bytes,62+(i*8),66+(i*8));
+                int materialType1 = bytesToInt2(materialType,0);
+                axisState.setActionAxis(actionAxis1);
+                axisState.setMaterialCount(materialCount1);
+                axisState.setMaterialType(materialType1);
+                axisStates.add(axisState);
+                location=66+(i*8);
+            }
+            if(CollUtil.isNotEmpty(axisStates)){
+                megHeader.setAxisStates(axisStates);
+            }
+            //坐标X
+            byte[] x= Arrays.copyOfRange(bytes,location,location+4);
+            int x1 = bytesToInt2(x,0);
+            //坐标y
+            byte[] y= Arrays.copyOfRange(bytes,location+4,location+8);
+            int y1 = bytesToInt2(y,0);
+            //异常码
+            byte[] alarmCode= Arrays.copyOfRange(bytes,location+8,location+12);
+            int alarmCode1 = bytesToInt2(alarmCode,0);
+            megHeader.setAgvId(agvId1);
+            megHeader.setTaskNum(taskNum1);
+            megHeader.setAgvEnergy(agvEnergy1);
+            megHeader.setAgvState(agvState1);
+            megHeader.setCurStationNum(curStationNum1);
+            megHeader.setX(x1);
+            megHeader.setY(y1);
+            megHeader.setAgvAngle(String.valueOf(agvAngle1/100));
+            megHeader.setAxleQty(axleQty1);
+            megHeader.setAlarmCode(alarmCode1);
+        }else{
+            byte[] data= Arrays.copyOfRange(bytes,42,42+packLength1-48);
+            String data1 = new String(data, "GBK");
+            megHeader.setData(data1);
+        }
 //        byte[] dataSize= Arrays.copyOfRange(bytes,42,46);
 //        int dataSize1 = bytesToInt(dataSize,0);
-        byte[] data= Arrays.copyOfRange(bytes,42,42+packLength1-48);
-        String data1 = new String(data, "GBK");
+//        byte[] data= Arrays.copyOfRange(bytes,42,42+packLength1-48);
+//        String data1 = new String(data, "GBK");
 
         megHeader.setPackNr(packNr1);
         megHeader.setPackLength(packLength1);
         megHeader.setSenderCode(senderCode1);
         megHeader.setHeart(heart1);
         megHeader.setPackType(packType1);
-        megHeader.setData(data1);
+//        megHeader.setData(data1);
 //        megHeader.setDataSize(dataSize1);
         return megHeader;
     }

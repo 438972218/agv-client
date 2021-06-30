@@ -20,16 +20,4 @@ import java.util.List;
 @Service
 public class AgvStateServiceImpl extends ServiceImpl<AgvStateMapper, AgvState> implements IAgvStateService {
 
-    @Autowired
-    AgvStateMapper agvStateMapper;
-
-    @Override
-    public Integer insertReturnId(AgvState agvState) {
-        return agvStateMapper.insertReturnId(agvState);
-    }
-
-    @Override
-    public List<AgvState> listAll(AgvState agvState) {
-        return agvStateMapper.listAll(agvState);
-    }
 }

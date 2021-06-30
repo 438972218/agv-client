@@ -24,6 +24,7 @@ swagger:
 netty:
   server:
     host: 192.168.1.106
+#    host: 192.168.1.249
     port: 55200
 
 

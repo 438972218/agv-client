@@ -15,8 +15,8 @@ import java.util.List;
  */
 public interface IAgvStateService extends IService<AgvState> {
 
-    Integer insertReturnId(AgvState agvState);
-
-    List<AgvState> listAll(AgvState agvState);
+//    Integer insertReturnId(AgvState agvState);
+//
+//    List<AgvState> listAll(AgvState agvState);
 
 }

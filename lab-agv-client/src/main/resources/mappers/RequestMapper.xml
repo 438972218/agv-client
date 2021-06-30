@@ -35,16 +35,16 @@
         LEFT JOIN station_task_info sti on si.id =sti.station_info_id
         <where>
             <if test="id!=null">
-                r.id = #{id,jdbcType=BIGINT}
+                and r.id = #{id,jdbcType=BIGINT}
             </if>
             <if test="taskNum!=null">
-                r.task_num = #{taskNum,jdbcType=INTEGER}
+                and r.task_num = #{taskNum,jdbcType=INTEGER}
             </if>
             <if test="agvId!=null">
-                r.agv_id = #{agvId,jdbcType=INTEGER}
+                and r.agv_id = #{agvId,jdbcType=INTEGER}
             </if>
             <if test="status!=null">
-                r.status = #{status,jdbcType=INTEGER}
+                and r.status = #{status,jdbcType=INTEGER}
             </if>
         </where>
         order by r.create_time desc

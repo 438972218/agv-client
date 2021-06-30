@@ -1,10 +1,12 @@
 package com.xdcplus.netty.common.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <p>
@@ -62,5 +64,28 @@ public class AgvMessage implements Serializable {
     private String type;
 
     private Timestamp date;
+
+    private Integer agvId;
+
+    private Integer taskNum;
+
+    private Integer agvEnergy;
+
+    private Integer agvState;
+
+    private Integer curStationNum;
+
+    private Integer x;
+
+    private Integer y;
+
+    private String agvAngle;
+
+    private Integer axleQty;
+
+    private Integer alarmCode;
+
+    @TableField(exist = false)
+    private List<AxisState> axisStates;
 
 }

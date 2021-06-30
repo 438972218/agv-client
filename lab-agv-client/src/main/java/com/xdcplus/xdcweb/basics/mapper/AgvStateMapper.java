@@ -14,9 +14,4 @@ import java.util.List;
  * @since 2021-05-06
  */
 public interface AgvStateMapper extends BaseMapper<AgvState> {
-
-    Integer insertReturnId(AgvState agvState);
-
-    List<AgvState> listAll(AgvState agvState);
-
 }

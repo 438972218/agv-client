@@ -1,6 +1,7 @@
 package com.xdcplus.netty.common.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,17 +48,12 @@ public class AgvState implements Serializable {
     /**
      * AGV状态
      */
-    private Integer state;
+    private Integer agvState;
 
     /**
      * 当前站台
      */
     private Integer curStationNum;
-
-    /**
-     * 当前地图id
-     */
-    private Integer mapId;
 
     /**
      * 坐标X
@@ -74,6 +70,15 @@ public class AgvState implements Serializable {
      */
     private LocalDateTime createTime;
 
+    private String agvAngle;
+
+    private Integer axleQty;
+
+    private Integer alarmCode;
+
+    private LocalDateTime updateTime;
+
+    @TableField(exist = false)
     private List<AxisState> axisStates;
 
 }

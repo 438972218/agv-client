@@ -1,6 +1,8 @@
 package com.xdcplus.xdcweb.basics.controller;
 
 
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xdcplus.netty.common.model.AgvState;
 import com.xdcplus.xdcweb.basics.service.IAgvStateService;
 import com.xdcplus.xdcweb.global.pojo.vo.ResponseVO;
@@ -27,11 +29,18 @@ public class AgvStateController {
     IAgvStateService agvStateService;
 
     @PostMapping("/list")
-    public ResponseVO<List<AgvState>> list(@RequestBody AgvState agvState) {
+    public ResponseVO<AgvState> list(@RequestBody AgvState agvState) {
 
-        List<AgvState> agvStates = agvStateService.listAll(agvState);
-
-        return ResponseVO.success(agvStates);
+        QueryWrapper<AgvState> queryWrapper=new QueryWrapper<>();
+        if(agvState.getAgvId()!=null){
+            queryWrapper.eq("agv_id",agvState.getAgvId());
+        }
+        List<AgvState> agvStates = agvStateService.list(queryWrapper);
+        if(CollUtil.isNotEmpty(agvStates)){
+            return ResponseVO.success(agvStates.get(0));
+        }else{
+            return ResponseVO.success();
+        }
     }
 
 }
